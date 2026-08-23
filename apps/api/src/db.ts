@@ -21,7 +21,8 @@ const migrationDirectory = resolve(dirname(fileURLToPath(import.meta.url)), "../
 const migrationFiles = [
   "001_create_files.sql",
   "002_create_jobs.sql",
-  "003_create_file_rows.sql"
+  "003_create_file_rows.sql",
+  "004_convert_timestamps_to_timestamptz.sql"
 ];
 
 export const initializeDatabase = async () => {
