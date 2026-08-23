@@ -1,0 +1,18 @@
+{
+  "name": "taskflow",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "bun run --filter @taskflow/web dev",
+    "dev:api": "bun run --filter @taskflow/api dev",
+    "dev:worker": "bun run --filter @taskflow/worker dev",
+    "dev": "bun run --filter '*' dev",
+    "start": "bun run dev",
+    "db:up": "docker compose up -d postgres redis minio",
+    "db:down": "docker compose down",
+    "build": "bun run --filter '*' build"
+  }
+}

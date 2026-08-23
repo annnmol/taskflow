@@ -1,0 +1,23 @@
+{
+  "name": "@taskflow/worker",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/worker.ts",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1116.0",
+    "csv-parse": "^7.0.2",
+    "dotenv": "^17.4.2",
+    "pg": "^8.23.0",
+    "redis": "^6.2.1"
+  }
+}

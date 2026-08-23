@@ -1,0 +1,98 @@
+services:
+
+  # PostgreSQL
+  postgres:
+    image: postgres:17
+    container_name: ${PROJECT_NAME}-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+  # Redis
+  redis:
+    image: redis:8
+    container_name: ${PROJECT_NAME}-redis
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    ports:
+      - "${REDIS_PORT}:6379"
+
+    volumes:
+      - redis_data:/data
+
+
+  # MinIO - S3 compatible object storage
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: ${PROJECT_NAME}-minio
+    restart: unless-stopped
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+
+    command: server /data --console-address ":9001"
+
+    ports:
+      - "${MINIO_API_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9001"
+
+    volumes:
+      - minio_data:/data
+
+
+  # LocalStack - optional AWS services
+  #
+  # Start with:
+  # docker compose --profile aws up -d
+  #
+  # S3 is intentionally NOT enabled here.
+  # MinIO handles S3.
+  # localstack:
+  #   image: localstack/localstack:latest
+  #   container_name: ${PROJECT_NAME}-localstack
+  #   restart: unless-stopped
+
+  #   profiles:
+  #     - aws
+
+  #   environment:
+  #     SERVICES: sqs,sns,lambda,dynamodb,apigateway
+  #     AWS_DEFAULT_REGION: ${AWS_REGION}
+  #     DEBUG: ${LOCALSTACK_DEBUG}
+
+  #   ports:
+  #     - "127.0.0.1:4566:4566"
+  #     - "127.0.0.1:4510-4559:4510-4559"
+
+  #   volumes:
+  #     - localstack_data:/var/lib/localstack
+  #     - /var/run/docker.sock:/var/run/docker.sock
+
+
+# Persistent volumes]
+volumes:
+
+  postgres_data:
+    name: ${PROJECT_NAME}-postgres-data
+
+  redis_data:
+    name: ${PROJECT_NAME}-redis-data
+
+  minio_data:
+    name: ${PROJECT_NAME}-minio-data
+
+  # localstack_data:
+  #   name: ${PROJECT_NAME}-localstack-data

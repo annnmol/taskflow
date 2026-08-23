@@ -1,0 +1,25 @@
+{
+  "name": "@taskflow/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1116.0",
+    "@aws-sdk/s3-request-presigner": "^3.1116.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.1.0",
+    "pg": "^8.23.0",
+    "redis": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.0",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
+  }
+}
