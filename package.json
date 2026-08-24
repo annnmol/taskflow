@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "workspaces": [
-    "apps/*"
+    "ui",
+    "server",
+    "worker"
   ],
   "scripts": {
     "dev:web": "bun run --filter @taskflow/web dev",

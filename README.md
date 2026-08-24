@@ -2,11 +2,11 @@
 
 TaskFlow is a distributed CSV background-processing project built to demonstrate queue-based architecture, worker concurrency, retries, idempotency, crash recovery, and dead-letter handling.
 
-## Apps
+## Services
 
-- `apps/web` — React + Vite + TypeScript dashboard
-- `apps/api` — Express + TypeScript API
-- `apps/worker` — TypeScript Redis Streams worker
+- `ui` — React + Vite + TypeScript dashboard
+- `server` — Express + TypeScript API
+- `worker` — TypeScript Redis Streams worker
 
 ## Architecture
 
@@ -35,10 +35,11 @@ flowchart TD
 bun install
 ```
 
-2. Copy env template and fill values:
+2. Copy the service environment templates and fill the shared infrastructure values:
 
 ```bash
-cp .env.example .env
+cp server/.env.example .env
+cp ui/.env.example ui/.env
 ```
 
 3. Start infrastructure:
@@ -64,7 +65,7 @@ bun run start
 - API: `http://localhost:3000`
 - Web: `http://localhost:5173`
 
-Set `VITE_API_URL=http://localhost:3000` in your root `.env` so the dashboard calls the API directly.
+Set `VITE_API_URL=http://localhost:3000` in `ui/.env` so the dashboard calls the API directly.
 
 Stop infrastructure:
 
@@ -74,8 +75,8 @@ bun run db:down
 
 ## Sample data
 
-- `sample_data/customers.csv` — small demo file (~100 rows)
-- `sample_data/customers-large.csv` — larger file (1,000 rows) for batching/backpressure tests
+- `constants/customers.csv` — small demo file (~100 rows)
+- `constants/customers-large.csv` — larger file (1,000 rows) for batching/backpressure tests
 
 ## API endpoints
 
@@ -120,7 +121,7 @@ Health check example:
 6. Worker writes parsed rows and status updates to PostgreSQL.
 7. Web polls file details while status is `QUEUED`, `PROCESSING`, or `RETRY_WAITING`.
 
-Worker concurrency is controlled in `apps/worker/src/lib/config.ts` (`maxConcurrency`, default: `2`).
+Worker concurrency is controlled in `worker/src/lib/config.ts` (`maxConcurrency`, default: `2`).
 
 ## Worker crash recovery
 
@@ -134,7 +135,7 @@ On each poll the worker recovers work in this order:
 
 ### Crash-recovery test
 
-In `apps/worker/src/lib/config.ts`:
+In `worker/src/lib/config.ts`:
 
 ```ts
 export const workerConfig = {
@@ -167,7 +168,7 @@ API rejects non-CSV names or invalid size with `INVALID_FILE` / `FILE_TOO_LARGE`
 
 ### Simulated worker failures
 
-Set in `apps/worker/src/lib/config.ts`:
+Set in `worker/src/lib/config.ts`:
 
 ```ts
 export const workerConfig = {
@@ -192,7 +193,7 @@ Worker fails with `NoSuchKey`, retries with exponential backoff, then moves to d
 
 Unacknowledged messages stay pending and are reclaimed on restart.
 
-## Worker config (`apps/worker/src/lib/config.ts`)
+## Worker config (`worker/src/lib/config.ts`)
 
 | Setting | Default | Purpose |
 |---------|---------|---------|
@@ -203,7 +204,7 @@ Unacknowledged messages stay pending and are reclaimed on restart.
 | `workerId` | `worker-<pid>` | Stable id for own-pending reclaim |
 | `deadLetterStreamKey` | `taskflow:dead-letter` | Dead-letter stream name |
 
-Root `.env` / `.env.example` hold shared infrastructure credentials only (Postgres, Redis, MinIO).
+The root `.env` holds shared infrastructure credentials (Postgres, Redis, MinIO); use `server/.env.example` as its template. `ui/.env` holds the dashboard's `VITE_API_URL` setting.
 
 ## Interview notes
 

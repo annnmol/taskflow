@@ -5,7 +5,7 @@
     "": {
       "name": "taskflow",
     },
-    "apps/api": {
+    "server": {
       "name": "@taskflow/api",
       "version": "0.1.0",
       "dependencies": {
@@ -24,7 +24,7 @@
         "typescript": "^5.9.2",
       },
     },
-    "apps/web": {
+    "ui": {
       "name": "@taskflow/web",
       "version": "0.1.0",
       "dependencies": {
@@ -39,7 +39,7 @@
         "vite": "^7.1.3",
       },
     },
-    "apps/worker": {
+    "worker": {
       "name": "@taskflow/worker",
       "version": "0.1.0",
       "dependencies": {
@@ -272,11 +272,11 @@
 
     "@smithy/types": ["@smithy/types@4.17.2", "", { "dependencies": { "tslib": "^2.6.2" } }, "sha512-FOKpVZob9MPTn2znRzGrnsMHv7BOsKVw3XiP/cOyYLDVZ9qKp4nifIiSCuUU/fIj5Vu0UOAxCFr+qRAtG0NUkA=="],
 
-    "@taskflow/api": ["@taskflow/api@workspace:apps/api"],
+    "@taskflow/api": ["@taskflow/api@workspace:server"],
 
-    "@taskflow/web": ["@taskflow/web@workspace:apps/web"],
+    "@taskflow/web": ["@taskflow/web@workspace:ui"],
 
-    "@taskflow/worker": ["@taskflow/worker@workspace:apps/worker"],
+    "@taskflow/worker": ["@taskflow/worker@workspace:worker"],
 
     "@types/babel__core": ["@types/babel__core@7.20.5", "", { "dependencies": { "@babel/parser": "^7.20.7", "@babel/types": "^7.20.7", "@types/babel__generator": "*", "@types/babel__template": "*", "@types/babel__traverse": "*" } }, "sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA=="],
 

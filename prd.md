@@ -248,57 +248,34 @@ Use a simple monorepo.
 ```text
 taskflow/
 │
-├── apps/
-│   │
-│   ├── api/
-│   │   ├── src/
-│   │   │   ├── config/
-│   │   │   ├── controllers/
-│   │   │   ├── routes/
-│   │   │   ├── services/
-│   │   │   ├── repositories/
-│   │   │   ├── queue/
-│   │   │   ├── middleware/
-│   │   │   ├── types/
-│   │   │   └── server.ts
-│   │   │
-│   │   ├── .env.example
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   │
-│   ├── worker/
-│   │   ├── src/
-│   │   │   ├── config/
-│   │   │   ├── queue/
-│   │   │   ├── processors/
-│   │   │   ├── services/
-│   │   │   ├── repositories/
-│   │   │   ├── types/
-│   │   │   └── worker.ts
-│   │   │
-│   │   ├── .env.example
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   │
-│   └── web/
-│       ├── src/
-│       │   ├── components/
-│       │   ├── pages/
-│       │   ├── services/
-│       │   ├── types/
-│       │   └── App.tsx
-│       │
-│       ├── package.json
-│       └── vite.config.ts
+├── server/
+│   ├── migrations/
+│   ├── src/
+│   │   ├── repositories/
+│   │   └── server.ts
+│   ├── .env.example
+│   ├── package.json
+│   └── tsconfig.json
 │
-├── packages/
-│   └── shared/
+├── worker/
+│   ├── src/
+│   │   ├── lib/
+│   │   ├── repositories/
+│   │   └── worker.ts
+│   ├── .env.example
+│   ├── package.json
+│   └── tsconfig.json
 │
-├── storage/
-│   ├── uploads/
-│   └── processed/
+├── ui/
+│   ├── src/
+│   │   ├── main.tsx
+│   │   └── styles.css
+│   ├── .env.example
+│   ├── package.json
+│   └── vite.config.ts
 │
-├── docker/
+├── constants/
+│   └── customers.csv
 │
 ├── docker-compose.yml
 ├── .gitignore
@@ -2369,9 +2346,9 @@ Requirements:
 
 1. Create the repository structure.
 2. Create a root package.json.
-3. Create a React + Vite + TypeScript frontend under apps/web.
-4. Create a Node.js + Express + TypeScript API under apps/api.
-5. Create a Node.js + TypeScript worker under apps/worker.
+3. Create a React + Vite + TypeScript frontend under ui.
+4. Create a Node.js + Express + TypeScript API under server.
+5. Create a Node.js + TypeScript worker under worker.
 6. Add appropriate TypeScript configuration.
 7. Add .gitignore.
 8. Add .env.example files with EMPTY values.
