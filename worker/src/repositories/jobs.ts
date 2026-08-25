@@ -11,6 +11,12 @@ export type Job = {
   error_message: string | null;
 };
 
+export type FailureState = {
+  status: JobStatus;
+  attempts: number;
+  max_attempts: number;
+};
+
 export const findJob = async (id: string): Promise<Job | null> => {
   const result = await pool.query<Job>(
     `SELECT id, file_id, status, attempts, max_attempts, error_message
@@ -57,8 +63,8 @@ export const markJobQueued = async (id: string): Promise<void> => {
 export const recordJobFailure = async (
   id: string,
   errorMessage: string
-): Promise<{ status: JobStatus; attempts: number; max_attempts: number }> => {
-  const result = await pool.query<{ status: JobStatus; attempts: number; max_attempts: number }>(
+): Promise<FailureState | null> => {
+  const result = await pool.query<FailureState>(
     `UPDATE jobs
      SET attempts = attempts + 1,
          error_message = $2,
@@ -72,9 +78,24 @@ export const recordJobFailure = async (
          END,
          updated_at = CURRENT_TIMESTAMP
      WHERE id = $1
+       AND status = 'PROCESSING'
      RETURNING status, attempts, max_attempts`,
     [id, errorMessage]
   );
 
-  return result.rows[0];
+  return result.rows[0] ?? null;
+};
+
+export const markJobDeadLettered = async (id: string): Promise<boolean> => {
+  const result = await pool.query(
+    `UPDATE jobs
+     SET dead_lettered_at = CURRENT_TIMESTAMP,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = $1
+       AND status = 'FAILED'
+       AND dead_lettered_at IS NULL`,
+    [id]
+  );
+
+  return result.rowCount === 1;
 };

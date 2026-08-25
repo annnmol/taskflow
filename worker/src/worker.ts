@@ -19,6 +19,7 @@ import { findFile, updateFileStatus } from "./repositories/files.js";
 import {
   findJob,
   markJobCompleted,
+  markJobDeadLettered,
   markJobProcessing,
   markJobQueued,
   recordJobFailure
@@ -103,20 +104,29 @@ const processMessage = async (messageId: string, fields: JobMessage, source: Str
     console.error(`Failed job ${job.id}:`, error);
 
     const failureState = await recordJobFailure(job.id, errorMessage);
+    if (!failureState) {
+      console.warn(`Ignoring duplicate failure for job ${job.id}; its attempt was already handled.`);
+      return;
+    }
+
     if (failureState.status === "FAILED") {
       await updateFileStatus(job.file_id, "FAILED");
-      const deadLetterMessageId = await publishToDeadLetter({
-        jobId: job.id,
-        fileId: job.file_id,
-        type: "CSV_PROCESS",
-        errorMessage,
-        attempts: failureState.attempts,
-        maxAttempts: failureState.max_attempts,
-        sourceMessageId: messageId
-      });
-      console.error(
-        `Job ${job.id} failed permanently after ${failureState.attempts}/${failureState.max_attempts} attempts; moved to dead-letter stream as ${deadLetterMessageId}.`
-      );
+      if (await markJobDeadLettered(job.id)) {
+        const deadLetterMessageId = await publishToDeadLetter({
+          jobId: job.id,
+          fileId: job.file_id,
+          type: "CSV_PROCESS",
+          errorMessage,
+          attempts: failureState.attempts,
+          maxAttempts: failureState.max_attempts,
+          sourceMessageId: messageId
+        });
+        console.error(
+          `Job ${job.id} failed permanently after ${failureState.attempts}/${failureState.max_attempts} attempts; moved to dead-letter stream as ${deadLetterMessageId}.`
+        );
+      } else {
+        console.warn(`Job ${job.id} was already sent to the dead-letter stream.`);
+      }
     } else {
       const retryDelayMs = computeRetryDelay(failureState.attempts);
       console.log(

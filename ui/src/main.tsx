@@ -17,6 +17,7 @@ type JobSummary = {
   attempts: number;
   maxAttempts: number;
   errorMessage: string | null;
+  deadLetteredAt: string | null;
 };
 
 type TaskFile = {
@@ -546,6 +547,12 @@ function App() {
                     <dd>
                       {fileDetails.job.attempts}/{fileDetails.job.maxAttempts}
                     </dd>
+                  </div>
+                )}
+                {fileDetails.job?.deadLetteredAt && (
+                  <div>
+                    <dt>Dead-lettered</dt>
+                    <dd>{new Date(fileDetails.job.deadLetteredAt).toLocaleString()}</dd>
                   </div>
                 )}
               </dl>

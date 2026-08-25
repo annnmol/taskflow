@@ -16,6 +16,7 @@ export type TaskJob = {
   attempts: number;
   max_attempts: number;
   error_message: string | null;
+  dead_lettered_at: Date | string | null;
   created_at: Date | string;
 };
 
@@ -25,6 +26,7 @@ export type JobSummary = {
   attempts: number;
   maxAttempts: number;
   errorMessage: string | null;
+  deadLetteredAt: string | null;
 };
 
 @Injectable()
@@ -44,6 +46,7 @@ export class JobsRepository {
           attempts,
           max_attempts,
           error_message,
+          dead_lettered_at,
           created_at`,
       [input.id, input.fileId, JobStatus.QUEUED],
     );
@@ -60,6 +63,7 @@ export class JobsRepository {
            attempts,
            max_attempts,
            error_message,
+           dead_lettered_at,
            created_at
          FROM jobs
          WHERE id = $1`,
@@ -78,6 +82,7 @@ export class JobsRepository {
            attempts,
            max_attempts,
            error_message,
+           dead_lettered_at,
            created_at
          FROM jobs
          WHERE file_id = $1
@@ -108,6 +113,7 @@ export class JobsRepository {
            attempts,
            max_attempts,
            error_message,
+           dead_lettered_at,
            created_at`,
       [id, JobStatus.QUEUED, JobStatus.FAILED],
     );
@@ -122,6 +128,9 @@ export class JobsRepository {
       attempts: job.attempts,
       maxAttempts: job.max_attempts,
       errorMessage: job.error_message,
+      deadLetteredAt: job.dead_lettered_at
+        ? new Date(job.dead_lettered_at).toISOString()
+        : null,
     };
   }
 }

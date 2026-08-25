@@ -20,6 +20,7 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     '002_create_jobs.sql',
     '003_create_file_rows.sql',
     '004_convert_timestamps_to_timestamptz.sql',
+    '005_add_dead_letter_tracking.sql',
   ];
 
   constructor(private readonly configService: ConfigService) {
