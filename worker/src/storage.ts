@@ -1,13 +1,10 @@
-import {
-  GetObjectCommand,
-  S3Client
-} from "@aws-sdk/client-s3";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 dotenv.config({
-  path: resolve(dirname(fileURLToPath(import.meta.url)), "../../../.env")
+  path: resolve(dirname(fileURLToPath(import.meta.url)), "../../../.env"),
 });
 
 const endpoint =
@@ -20,14 +17,19 @@ const client = new S3Client({
   region: process.env.AWS_REGION || "us-east-1",
   forcePathStyle: true,
   credentials: {
-    accessKeyId: process.env.MINIO_ROOT_USER || process.env.AWS_ACCESS_KEY_ID || "",
+    accessKeyId:
+      process.env.MINIO_ROOT_USER || process.env.AWS_ACCESS_KEY_ID || "",
     secretAccessKey:
-      process.env.MINIO_ROOT_PASSWORD || process.env.AWS_SECRET_ACCESS_KEY || ""
-  }
+      process.env.MINIO_ROOT_PASSWORD ||
+      process.env.AWS_SECRET_ACCESS_KEY ||
+      "",
+  },
 });
 
 export const readObject = async (key: string): Promise<string> => {
-  const result = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  const result = await client.send(
+    new GetObjectCommand({ Bucket: bucket, Key: key }),
+  );
   if (!result.Body) {
     throw new Error(`Stored object has no body: ${key}`);
   }

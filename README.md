@@ -64,8 +64,10 @@ bun run start
 
 - API: `http://localhost:3000`
 - Web: `http://localhost:5173`
+- Worker: no HTTP port; it is a background process that consumes Redis jobs.
 
 Set `VITE_API_URL=http://localhost:3000` in `ui/.env` so the dashboard calls the API directly.
+Set `CORS_ORIGIN=http://localhost:5173` in the API environment (`.env` or `server/.env`) to allow the dashboard's browser requests. Use a comma-separated list when serving the UI from more than one origin.
 
 Stop infrastructure:
 
@@ -204,7 +206,7 @@ Unacknowledged messages stay pending and are reclaimed on restart.
 | `workerId` | `worker-<pid>` | Stable id for own-pending reclaim |
 | `deadLetterStreamKey` | `taskflow:dead-letter` | Dead-letter stream name |
 
-The root `.env` holds shared infrastructure credentials (Postgres, Redis, MinIO); use `server/.env.example` as its template. `ui/.env` holds the dashboard's `VITE_API_URL` setting.
+The root `.env` holds shared infrastructure credentials (Postgres, Redis, MinIO) and API settings such as `PORT` and `CORS_ORIGIN`; use `server/.env.example` as its template. `ui/.env` holds the dashboard's `VITE_API_URL` setting. The worker has no browser-facing URL or CORS setting: it connects to Redis, PostgreSQL, and MinIO using its infrastructure configuration.
 
 ## Interview notes
 

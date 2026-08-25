@@ -1,6 +1,8 @@
 export default () => ({
   NODE_ENV: process.env.NODE_ENV,
   PROJECT_NAME: process.env.PROJECT_NAME,
+  PORT: Number(process.env.PORT ?? 3000),
+  CORS_ORIGIN: process.env.CORS_ORIGIN,
 
   POSTGRES_HOST: process.env.POSTGRES_HOST ?? 'localhost',
   POSTGRES_USER: process.env.POSTGRES_USER,
