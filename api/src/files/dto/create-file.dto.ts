@@ -17,7 +17,7 @@ export class CreateFileDto {
   name!: string;
 
   @IsString()
-  contentType = '';
+  contentType = 'text/csv';
 
   @Type(() => Number)
   @IsInt()
