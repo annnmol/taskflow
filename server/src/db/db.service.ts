@@ -96,4 +96,19 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
   async getClient(): Promise<PoolClient> {
     return this.pool.connect();
   }
+
+  async clearApplicationData(): Promise<void> {
+    const client = await this.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      await client.query('TRUNCATE TABLE file_rows, jobs, files');
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }

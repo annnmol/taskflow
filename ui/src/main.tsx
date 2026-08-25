@@ -51,7 +51,12 @@ type FileRowsResponse = {
 };
 
 type ApiErrorPayload = {
+  message?: string | string[];
   error?: string | { code?: string; message?: string };
+};
+
+type ApiSuccessPayload<T> = {
+  data: T;
 };
 
 const rowsPageSize = 10;
@@ -66,6 +71,12 @@ const inFlightStatuses = new Set<FileStatus>(["QUEUED", "PROCESSING", "RETRY_WAI
 const readApiErrorMessage = async (response: Response, fallback: string): Promise<string> => {
   try {
     const payload = await response.json() as ApiErrorPayload;
+    if (typeof payload.message === "string" && payload.message.trim()) {
+      return payload.message;
+    }
+    if (Array.isArray(payload.message) && payload.message.length > 0) {
+      return payload.message.join(" ");
+    }
     if (typeof payload.error === "string" && payload.error.trim()) {
       return payload.error;
     }
@@ -81,6 +92,16 @@ const readApiErrorMessage = async (response: Response, fallback: string): Promis
   } catch {
     return fallback;
   }
+};
+
+const readApiData = async <T,>(response: Response): Promise<T> => {
+  // Nest success responses use { message, status, data }; retain raw-response support
+  // for endpoints that intentionally bypass the global interceptor.
+  const payload = await response.json() as T | ApiSuccessPayload<T>;
+  if (typeof payload === "object" && payload !== null && "data" in payload) {
+    return payload.data;
+  }
+  return payload;
 };
 
 const formatFileSize = (size: number | null): string => {
@@ -126,7 +147,7 @@ function App() {
       if (!response.ok) {
         throw new Error(await readApiErrorMessage(response, "Unable to load files."));
       }
-      const payload = await response.json() as TaskFile[];
+      const payload = await readApiData<TaskFile[]>(response);
       setFiles(payload);
       setFilesError("");
     } catch (error) {
@@ -147,7 +168,7 @@ function App() {
       if (!response.ok) {
         throw new Error(await readApiErrorMessage(response, "Unable to load file details."));
       }
-      const payload = await response.json() as FileDetails;
+      const payload = await readApiData<FileDetails>(response);
       setFileDetails(payload);
       setDetailsError("");
       setFiles((current) =>
@@ -211,7 +232,7 @@ function App() {
         if (!response.ok) {
           throw new Error(await readApiErrorMessage(response, "Unable to load file rows."));
         }
-        const payload = await response.json() as FileRowsResponse;
+        const payload = await readApiData<FileRowsResponse>(response);
         setSelectedFileRows(payload.rows);
         setRowsTotal(payload.total);
       } catch (error) {
@@ -226,6 +247,7 @@ function App() {
 
   const createFile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
     if (!selectedUpload) {
       setActionError("Choose a CSV file before uploading.");
       return;
@@ -247,7 +269,7 @@ function App() {
       if (!response.ok) {
         throw new Error(await readApiErrorMessage(response, "Unable to create file."));
       }
-      const { file: createdFile, uploadUrl } = await response.json() as CreateFileResponse;
+      const { file: createdFile, uploadUrl } = await readApiData<CreateFileResponse>(response);
 
       const uploadResponse = await fetch(uploadUrl, {
         method: "PUT",
@@ -270,7 +292,7 @@ function App() {
       await loadFiles();
       setActionSuccess(`"${createdFile.name}" uploaded successfully. Job queued for processing.`);
       setSelectedUpload(null);
-      event.currentTarget.reset();
+      form.reset();
     } catch (error) {
       setActionError(error instanceof Error ? error.message : "Unable to upload file.");
     } finally {
@@ -287,7 +309,7 @@ function App() {
       if (!targetJobId && file.status === "FAILED") {
         const detailsResponse = await fetch(apiUrl(`/api/files/${file.id}`));
         if (detailsResponse.ok) {
-          const details = await detailsResponse.json() as FileDetails;
+          const details = await readApiData<FileDetails>(detailsResponse);
           targetJobId = details.job?.id ?? null;
         }
       }
@@ -323,7 +345,7 @@ function App() {
       if (!response.ok) {
         throw new Error(await readApiErrorMessage(response, "Unable to get download URL."));
       }
-      const payload = await response.json() as { downloadUrl?: string };
+      const payload = await readApiData<{ downloadUrl?: string }>(response);
       if (!payload.downloadUrl) {
         throw new Error("Download URL missing from API response.");
       }

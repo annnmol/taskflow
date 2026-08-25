@@ -8,7 +8,7 @@
     "worker"
   ],
   "scripts": {
-    "dev:web": "bun run --filter @taskflow/ui dev",
+    "dev:ui": "bun run --filter @taskflow/ui dev",
     "dev:server": "bun run --filter @taskflow/server dev",
     "dev:worker": "bun run --filter @taskflow/worker dev",
     "dev": "bun run --filter '*' dev",

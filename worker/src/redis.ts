@@ -1,12 +1,6 @@
-import dotenv from "dotenv";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { createClient } from "redis";
 import { workerConfig } from "./lib/config.js";
-
-dotenv.config({
-  path: resolve(dirname(fileURLToPath(import.meta.url)), "../../../.env")
-});
+import "./env.js";
 
 const redisUrl = process.env.REDIS_URL || (() => {
   const username = process.env.REDIS_USERNAME;

@@ -134,4 +134,12 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     return this.client.ping();
   }
+
+  async clearDatabase() {
+    if (!this.client.isReady) {
+      throw new Error('Redis client is not ready.');
+    }
+
+    await this.client.flushDb();
+  }
 }
