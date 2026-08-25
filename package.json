@@ -5,11 +5,13 @@
   "workspaces": [
     "ui",
     "server",
+    "api",
     "worker"
   ],
   "scripts": {
-    "dev:web": "bun run --filter @taskflow/web dev",
+    "dev:web": "bun run --filter @taskflow/ui dev",
     "dev:api": "bun run --filter @taskflow/api dev",
+    "dev:server": "bun run --filter @taskflow/server dev",
     "dev:worker": "bun run --filter @taskflow/worker dev",
     "dev": "bun run --filter '*' dev",
     "start": "bun run dev",
