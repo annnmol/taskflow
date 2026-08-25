@@ -21,7 +21,7 @@ flowchart TD
   C1 -->|permanent failures| D[(Redis Stream taskflow:dead-letter)]
 ```
 
-## How it works
+### `How it works`
 1. User selects and uploads a CSV file.
 2. API stores metadata and returns a pre-signed S3 URL.
 3. Frontend uploads the CSV directly to S3.
@@ -32,7 +32,7 @@ flowchart TD
 8. Processed rows are stored in PostgreSQL.
 
 
-#### If Something Goes Wrong
+#### `If Something Goes Wrong`
 1. Worker fails while reading the CSV.
 2. Worker records the error and increments job attempts.
 3. Retry delay increases after each failed attempt.
@@ -40,33 +40,35 @@ flowchart TD
 5. Failed jobs are copied to **Dead Letter Stream**.
 6. Remain available for manual retry.
 
-#### Worker Crash Recovery
+#### `Worker Crash Recovery`
 1. Worker receives a job and starts processing it.
 2. Worker crashes before confirming the job(XACK) is complete.
 3. Redis keeps the job as pending instead of losing it.
 4. After 30 seconds, another worker can reclaim the same job(XAUTOCLAIM).
 5. The reclaimed job is processed again.
 
-##### Exponential Backoff
-- Failed job retry delay increases after each failed attempt.
 
-##### Dead-Letter
+
+##### `Exponential Backoff`
+- Retry delay increases after each failed attempt.
+
+##### `Dead-Letter`
 - Jobs that couldn't be successfully processed after all retry attempts
 - These are copied to a dead-letter stream for manual inspection and retry.
 
-##### Concurrency
+##### `Concurrency`
 - Each worker can handle up to 2 jobs concurrently.
-- Multiple workers can process jobs concurrently.
+- Multiple workers can process jobs simultaneously.
 
-##### Backpressure
+##### `Backpressure`
 - Limit the number of concurrent jobs per worker (2 jobs per worker).
 - Extra jobs remain in Redis until workers have capacity.
 
-##### Idempotency
+##### `Idempotency`
 - Repeated processing of the same job doesn't create duplicate CSV rows.
 - PostgreSQL enforces uniqueness using a composite key of `file_id + row_number`.
 
-
+-------------------------------------------------------------------------------
 #### Services
 
 - `UI` — React + Vite + TypeScript dashboard
