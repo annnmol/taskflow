@@ -8,10 +8,9 @@ function Header() {
   return (
     <header className="page-header">
       <div>
-        <Text variant="eyebrow">TaskFlow</Text>
-        <h1>Files Dashboard</h1>
-        <Text variant="muted">
-          Upload CSV files and track async background processing.
+        <h1>TaskFlow</h1>
+        <Text variant="eyebrow">
+          Distributed Background Job Processing
         </Text>
       </div>
       <Button

@@ -9,11 +9,21 @@ import {
   type ReactNode,
 } from "react";
 import { apiService } from "../services/api.service";
-import type { FileDetails, FileRow, TaskFile } from "../types/files";
+import type { FileDetails, FileRow, FileStatus, TaskFile } from "../types/files";
 
 const rowsPageSize = 10;
 const listPollMs = 5000;
 const detailsPollMs = 3000;
+const activeFileStatuses = new Set<FileStatus>([
+  "UPLOADED",
+  "QUEUED",
+  "PROCESSING",
+  "RETRY_WAITING",
+]);
+
+function isFileActive(status: FileStatus) {
+  return activeFileStatuses.has(status);
+}
 
 type TaskFlowState = {
   files: TaskFile[];
@@ -106,6 +116,13 @@ const TaskFlowContext = createContext<TaskFlowContextValue | null>(null);
 
 export function TaskFlowProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(taskFlowReducer, initialState);
+  const hasActiveFiles = state.files.some((file) => isFileActive(file.status));
+  const shouldPollSelectedFile = Boolean(
+    state.selectedFileId && (
+      state.fileDetails?.id !== state.selectedFileId ||
+      (state.fileDetails && isFileActive(state.fileDetails.status))
+    ),
+  );
 
   const loadFiles = useCallback(async (showLoading = false) => {
     if (showLoading) dispatch({ type: "update", payload: { isFilesLoading: true } });
@@ -134,17 +151,22 @@ export function TaskFlowProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void loadFiles(true);
-    const interval = window.setInterval(() => void loadFiles(), listPollMs);
-    return () => window.clearInterval(interval);
   }, [loadFiles]);
 
   useEffect(() => {
+    if (!hasActiveFiles) return;
+    const interval = window.setInterval(() => void loadFiles(), listPollMs);
+    return () => window.clearInterval(interval);
+  }, [hasActiveFiles, loadFiles]);
+
+  useEffect(() => {
     if (!state.selectedFileId) return;
+    if (!shouldPollSelectedFile) return;
     const fileId = state.selectedFileId;
     void loadFileDetails(fileId, true);
     const interval = window.setInterval(() => void loadFileDetails(fileId), detailsPollMs);
     return () => window.clearInterval(interval);
-  }, [state.selectedFileId, loadFileDetails]);
+  }, [loadFileDetails, shouldPollSelectedFile, state.selectedFileId]);
 
   useEffect(() => {
     if (!state.selectedFileId || state.fileDetails?.status !== "COMPLETED") return;
@@ -218,7 +240,15 @@ export function TaskFlowProvider({ children }: { children: ReactNode }) {
     refreshFiles: () => loadFiles(true),
     setSelectedUpload: (selectedUpload) => dispatch({ type: "update", payload: { selectedUpload } }),
     uploadFile,
-    openFileDetails: (file) => dispatch({ type: "update", payload: { selectedFileId: file.id, rowsPage: 1, rowsError: "" } }),
+    openFileDetails: (file) => dispatch({ type: "update", payload: {
+      selectedFileId: file.id,
+      fileDetails: null,
+      detailsError: "",
+      selectedFileRows: [],
+      rowsTotal: 0,
+      rowsPage: 1,
+      rowsError: "",
+    } }),
     closeFileDetails: () => dispatch({ type: "closeFileDetails" }),
     retryFile,
     downloadSelectedFile,

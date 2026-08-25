@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { FileDetailsPanel } from "./components/dashboard/FileDetailsPanel";
+import { FileDetailsDrawer } from "./components/dashboard/FileDetailsPanel";
 import { FilesTable } from "./components/dashboard/FilesTable";
 import UploadPanel from "./components/dashboard/UploadPanel";
 import AppLayout from "./components/layout/AppLayout";
@@ -26,8 +26,8 @@ function Dashboard() {
           {actionError}
         </Text>
       )}
-      {selectedFileId && <FileDetailsPanel />}
       <FilesTable />
+      {selectedFileId && <FileDetailsDrawer />}
     </AppLayout>
   );
 }

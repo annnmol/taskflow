@@ -15,9 +15,9 @@ function UploadPanel() {
       >
         <div className="upload-copy">
           <h2 id="upload-heading">Upload a CSV file</h2>
-          <Text variant="muted">
-            Files upload to S3-compatible storage and process asynchronously.
-          </Text>
+          {/* <Text variant="muted">
+         Files upload directly to S3 via presigned URLs and process asynchronously.
+          </Text> */}
         </div>
         <div className="upload-controls">
           <input

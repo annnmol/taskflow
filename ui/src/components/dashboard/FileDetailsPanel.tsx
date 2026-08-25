@@ -2,7 +2,7 @@ import { memo, type ReactNode } from "react";
 import { useTaskFlowStore } from "../../store/TaskFlowStore";
 import type { FileDetails, FileRow } from "../../types/files";
 import Button from "../ui/Button";
-import Panel from "../ui/Panel";
+import Drawer from "../ui/Drawer";
 import StatusBadge from "../ui/StatusBadge";
 import Text from "../ui/Text";
 
@@ -33,7 +33,7 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export const FileDetailsPanel = memo(function FileDetailsPanel() {
+export const FileDetailsDrawer = memo(function FileDetailsDrawer() {
   const {
     fileDetails: file,
     selectedFileRows: rows,
@@ -57,9 +57,10 @@ export const FileDetailsPanel = memo(function FileDetailsPanel() {
   const isProcessing = file ? inFlightStatuses.has(file.status) : false;
 
   return (
-    <Panel className="details-panel" aria-live="polite">
-      <div className="section-heading">
-        <h2>File details</h2>
+    <Drawer
+      title="File details"
+      onClose={closeFileDetails}
+      actions={
         <div className="actions">
           <Button
             type="button"
@@ -77,11 +78,9 @@ export const FileDetailsPanel = memo(function FileDetailsPanel() {
               {retryingFileId === file.id ? "Retrying..." : "Retry job"}
             </Button>
           )}
-          <Button type="button" onClick={closeFileDetails}>
-            Close
-          </Button>
         </div>
-      </div>
+      }
+    >
       {isDetailsLoading && !file ? (
         <Text variant="muted">Loading file details...</Text>
       ) : detailsError ? (
@@ -91,7 +90,7 @@ export const FileDetailsPanel = memo(function FileDetailsPanel() {
       ) : (
         file && (
           <>
-            <dl className="details-grid">
+            <dl className="details-grid details-grid-compact">
               <Detail label="Filename">{file.name}</Detail>
               <Detail label="Status">
                 <StatusBadge status={file.status} />
@@ -164,7 +163,7 @@ export const FileDetailsPanel = memo(function FileDetailsPanel() {
           </>
         )
       )}
-    </Panel>
+    </Drawer>
   );
 });
 
@@ -183,8 +182,8 @@ function RowsTable({
 }) {
   const colSpan = Math.max(1, columns.length + 1);
   return (
-    <div className="table-wrapper">
-      <table>
+    <div className="table-wrapper csv-table-wrapper">
+      <table className="csv-table">
         <thead>
           <tr>
             <th>Row</th>
